@@ -15,7 +15,7 @@ import { PromoCard } from './promo-card'
 import { getRankColor, cn } from '@/lib/utils'
 import {
   Flame, Shield, Brain, Dumbbell, Palette, Briefcase, Users,
-  RotateCcw, ChevronRight, Swords, Coins, ArrowUpRight, Trophy, Sparkles, Zap,
+  ChevronRight, Swords, Coins, ArrowUpRight, Trophy, Sparkles, Zap,
 } from 'lucide-react'
 import type { Stats } from '@/store/game-store'
 import type { GameEvent } from './event-modal'
@@ -333,8 +333,6 @@ function LogTab() {
 function ProfileTab() {
   const profile = useGameStore((s) => s.profile)
   const transfers = useGameStore((s) => s.transfers)
-  const resetDemo = useGameStore((s) => s.resetDemo)
-  const showSnack = useUIStore((s) => s.showSnack)
   const rank = getRankColor(profile.rank)
 
   return (
@@ -440,14 +438,6 @@ function ProfileTab() {
         </>
       )}
 
-      {/* Reset */}
-      <button
-        onClick={() => { resetDemo(); showSnack('Демо сброшено', 'info') }}
-        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white text-stone-500 font-medium text-sm active:bg-stone-50 transition-colors mb-4"
-      >
-        <RotateCcw size={16} />
-        Сбросить демо
-      </button>
     </div>
   )
 }

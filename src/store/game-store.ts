@@ -76,7 +76,6 @@ interface GameState {
   claimPromo: (promo: Promo) => void
   dismissEvent: (id: string) => void
   transferJuti: (amount: number) => boolean
-  resetDemo: () => void
 }
 
 /* ── Helpers ── */
@@ -118,59 +117,25 @@ function applyRewards(stats: Stats, rewards: string[], positive: boolean) {
   })
 }
 
-/* ── Quest pool ── */
-const questPool: Array<[QuestType, string, string, number, number, string[], number]> = [
-  ['Side Quest', 'Сделать 20 минут английского', 'Пройди speaking practice или повтори 20 новых слов.', 18, -5, ['+1 Mind'], 8],
-  ['Hidden Quest', 'Выйти на прогулку на 20 минут', 'Просто выйди на улицу, проветрись и пройдись без телефона.', 16, -4, ['+1 Body'], 12],
-  ['Main Quest', 'Доделать один экран дизайна', 'Выбери один экран и доведи его до аккуратного рабочего состояния.', 35, -10, ['+1 Creativity', '+1 Career'], 25],
-  ['Daily Quest', 'Разобрать 1 важный документ', 'Открой, прочитай и разложи по полочкам один нужный файл или тему.', 20, -6, ['+1 Mind'], 10],
-]
-
 /* ── Default state ── */
 const defaultProfile: Profile = {
   name: 'Ануар',
-  level: 3,
-  xp: 120,
-  xpToNext: 200,
+  level: 1,
+  xp: 0,
+  xpToNext: 80,
   rank: 'E-Rank',
-  streak: 4,
-  stats: { discipline: 11, mind: 14, body: 7, creativity: 13, career: 9, social: 6 },
-  juti: 150,
+  streak: 0,
+  stats: { discipline: 1, mind: 1, body: 1, creativity: 1, career: 1, social: 1 },
+  juti: 0,
 }
-
-const defaultQuests: Quest[] = [
-  {
-    id: uid(), title: 'Подготовить 10 ответов на визовое интервью',
-    description: 'Собери 10 сильных коротких ответов для Work and Travel interview и проговори их вслух 2 раза.',
-    type: 'Boss Quest', xp: 120, penalty: -25, status: 'active',
-    rewards: ['+2 Mind', '+2 Discipline', '+1 Social'], jutiReward: 50,
-  },
-  {
-    id: uid(), title: 'Закрыть один учебный хвост до вечера',
-    description: 'Выбери одну задачу, которую давно откладывал, и закрой её полностью без полумер.',
-    type: 'Main Quest', xp: 55, penalty: -15, status: 'active',
-    rewards: ['+1 Discipline', '+1 Career'], jutiReward: 25,
-  },
-  {
-    id: uid(), title: '30 минут фокусной работы без телефона',
-    description: 'Поставь таймер и поработай 30 минут в полном фокусе. Никаких соцсетей и скачков между задачами.',
-    type: 'Daily Quest', xp: 25, penalty: -8, status: 'active',
-    rewards: ['+1 Discipline'], jutiReward: 10,
-  },
-]
-
-const defaultLogs: LogEntry[] = [
-  makeLog('System initialized', 'MVP активирован. Квесты назначены. Штрафной протокол включён.', true),
-  makeLog('Victor note', 'Не копи квесты. Лучше закрыть один полностью, чем пять наполовину.', false),
-]
 
 /* ── Store ── */
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
       profile: { ...defaultProfile, stats: { ...defaultProfile.stats } },
-      quests: defaultQuests.map(q => ({ ...q })),
-      logs: [...defaultLogs],
+      quests: [],
+      logs: [makeLog('Ascend System', 'Система активирована. Запроси первый квест.', true)],
       transfers: [],
       events: [],
       promos: [],
@@ -235,14 +200,20 @@ export const useGameStore = create<GameState>()(
           return { quests: [penaltyQuest, ...newQuests], profile: newProfile, logs: [newLog, ...state.logs] }
         }),
 
-      generateQuest: () =>
-        set((state) => {
-          const [type, title, description, xp, penalty, rewards, jutiReward] =
-            questPool[Math.floor(Math.random() * questPool.length)]
-          const quest: Quest = { id: uid(), type, title, description, xp, penalty, status: 'active', rewards, jutiReward }
-          const log = makeLog('New quest assigned', `Получен: ${title} (+${jutiReward} JUTI)`, true)
-          return { quests: [quest, ...state.quests], logs: [log, ...state.logs] }
-        }),
+      generateQuest: () => {
+        // Local fallback — only used if API fails
+        const fallback: Quest = {
+          id: uid(), type: 'Daily Quest',
+          title: '30 минут фокусной работы',
+          description: 'Поставь таймер и поработай 30 минут в полном фокусе. Никаких отвлечений.',
+          xp: 20, penalty: -6, status: 'active',
+          rewards: ['+1 Discipline'], jutiReward: 8,
+        }
+        set((state) => ({
+          quests: [fallback, ...state.quests],
+          logs: [makeLog('Quest assigned', `Получен: ${fallback.title}`, true), ...state.logs],
+        }))
+      },
 
       /* ── Openclaw API Integration ── */
 
@@ -452,17 +423,7 @@ export const useGameStore = create<GameState>()(
         return true
       },
 
-      resetDemo: () =>
-        set(() => ({
-          profile: { ...defaultProfile, stats: { ...defaultProfile.stats } },
-          quests: defaultQuests.map(q => ({ ...q, id: uid() })),
-          logs: [makeLog('System reset', 'Демо сброшено. Начинаем с нуля.', true)],
-          transfers: [],
-          events: [],
-          promos: [],
-          claimedPromos: [],
-        })),
     }),
-    { name: 'ascend-system-v4' },
+    { name: 'ascend-system-v5' },
   ),
 )
