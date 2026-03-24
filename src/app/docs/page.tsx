@@ -167,6 +167,35 @@ const endpoints = [
     notes: 'type: "multiplier" | "bonus" | "cashback" | "shield". minLevel — минимальный уровень для активации.',
   },
   {
+    method: 'POST',
+    path: '/api/openclaw/create-manual-quest',
+    title: 'Ручное создание квеста от Виктора',
+    description: 'Позволяет вручную инжектить сюжетный или специальный квест в систему без рандомной AI-генерации.',
+    body: `{
+  "title": "Архитектор своей Системы",
+  "description": "Определи фундамент своей Solo Leveling-системы...",
+  "type": "Main Quest",
+  "xp": 45,
+  "penalty": -12,
+  "rewards": ["+1 Mind", "+1 Discipline"],
+  "jutiReward": 20,
+  "source": "Victor Manual Quest"
+}`,
+    response: `{
+  "quest": {
+    "title": "Архитектор своей Системы",
+    "description": "Определи фундамент своей Solo Leveling-системы...",
+    "type": "Main Quest",
+    "xp": 45,
+    "penalty": -12,
+    "rewards": ["+1 Mind", "+1 Discipline"],
+    "jutiReward": 20,
+    "source": "Victor Manual Quest",
+    "injectedAt": "2026-03-24T13:00:00.000Z"
+  }
+}`,
+  },
+  {
     method: 'GET',
     path: '/api/openclaw/status',
     title: 'Статус системы',
@@ -183,7 +212,8 @@ const endpoints = [
     "coin-management",
     "rank-assignment",
     "event-creation",
-    "promo-creation"
+    "promo-creation",
+    "manual-quest-injection"
   ],
   "model": "openclaw-v1-mock",
   "uptime": 12345.678,

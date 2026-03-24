@@ -76,6 +76,16 @@ interface GameState {
   claimPromo: (promo: Promo) => void
   dismissEvent: (id: string) => void
   transferJuti: (amount: number) => boolean
+  injectManualQuest: (payload: {
+    title: string
+    description: string
+    type?: QuestType
+    xp?: number
+    penalty?: number
+    rewards?: string[]
+    jutiReward?: number
+    source?: string
+  }) => Promise<void>
 }
 
 /* ── Helpers ── */
@@ -421,6 +431,50 @@ export const useGameStore = create<GameState>()(
           logs: [makeLog('Transfer', `Переведено ${amount} JUTI → ${amount} ₸`, true), ...state.logs],
         })
         return true
+      },
+
+      injectManualQuest: async (payload) => {
+        try {
+          const res = await fetch('/api/openclaw/create-manual-quest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+          if (!res.ok) throw new Error('API error')
+          const data = await res.json()
+          const q = data.quest
+          const quest: Quest = {
+            id: uid(),
+            title: q.title,
+            description: q.description,
+            type: q.type,
+            xp: q.xp,
+            penalty: q.penalty,
+            status: 'active',
+            rewards: q.rewards,
+            jutiReward: q.jutiReward,
+          }
+          set((state) => ({
+            quests: [quest, ...state.quests],
+            logs: [makeLog('Victor quest injected', `${quest.title} добавлен в систему вручную.`, true), ...state.logs],
+          }))
+        } catch {
+          const quest: Quest = {
+            id: uid(),
+            title: payload.title,
+            description: payload.description,
+            type: payload.type || 'Main Quest',
+            xp: payload.xp || 35,
+            penalty: payload.penalty || -10,
+            status: 'active',
+            rewards: payload.rewards || ['+1 Discipline'],
+            jutiReward: payload.jutiReward || 15,
+          }
+          set((state) => ({
+            quests: [quest, ...state.quests],
+            logs: [makeLog('Victor quest injected', `${quest.title} добавлен локально.`, true), ...state.logs],
+          }))
+        }
       },
 
     }),

@@ -20,6 +20,7 @@ export async function GET() {
       'rank-assignment',
       'event-creation',
       'promo-creation',
+      'manual-quest-injection',
     ],
     model: 'openclaw-v1-mock',
     uptime: process.uptime(),

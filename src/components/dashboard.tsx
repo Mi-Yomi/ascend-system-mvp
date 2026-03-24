@@ -94,6 +94,7 @@ function HomeTab() {
   const claimPromo = useGameStore((s) => s.claimPromo)
   const fetchEvent = useGameStore((s) => s.fetchEvent)
   const fetchPromo = useGameStore((s) => s.fetchPromo)
+  const injectManualQuest = useGameStore((s) => s.injectManualQuest)
   const setTab = useUIStore((s) => s.setTab)
   const setShowTransfer = useUIStore((s) => s.setShowTransfer)
   const showSnack = useUIStore((s) => s.showSnack)
@@ -187,31 +188,58 @@ function HomeTab() {
       {/* Openclaw AI Actions */}
       <div className="mt-4">
         <h3 className="text-[15px] font-bold text-stone-900 mb-2.5">Openclaw AI</h3>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 gap-2">
           <button
-            onClick={async () => { showSnack('Openclaw создаёт событие...', 'info'); await fetchEvent(); showSnack('Новое событие создано!', 'success') }}
-            className="flex-1 bg-white rounded-2xl p-3.5 flex items-center gap-2.5 active:bg-stone-50 transition-colors"
+            onClick={async () => {
+              showSnack('Виктор добавляет сюжетный квест...', 'info')
+              await injectManualQuest({
+                title: 'Архитектор своей Системы',
+                description: 'За 45–60 минут определи фундамент своей Solo Leveling-системы: зачем она тебе, какие 3 сферы жизни качает, какие daily-квесты обязательны, какие штрафы справедливы и какой вайб системы тебе ближе.',
+                type: 'Main Quest',
+                xp: 45,
+                penalty: -12,
+                rewards: ['+1 Mind', '+1 Discipline'],
+                jutiReward: 20,
+                source: 'Victor Manual Quest',
+              })
+              showSnack('Квест от Виктора добавлен в систему', 'success')
+            }}
+            className="bg-white rounded-2xl p-3.5 flex items-center gap-2.5 active:bg-stone-50 transition-colors"
           >
-            <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
-              <Zap size={16} className="text-violet-500" />
+            <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
+              <Swords size={16} className="text-orange-500" />
             </div>
             <div className="text-left">
-              <p className="text-[13px] font-semibold text-stone-900">Событие</p>
-              <p className="text-[11px] text-stone-400">Получить</p>
+              <p className="text-[13px] font-semibold text-stone-900">Квест от Виктора</p>
+              <p className="text-[11px] text-stone-400">Инжект вручную</p>
             </div>
           </button>
-          <button
-            onClick={async () => { showSnack('Openclaw создаёт акцию...', 'info'); await fetchPromo(); showSnack('Новая акция!', 'success') }}
-            className="flex-1 bg-white rounded-2xl p-3.5 flex items-center gap-2.5 active:bg-stone-50 transition-colors"
-          >
-            <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
-              <Sparkles size={16} className="text-amber-500" />
-            </div>
-            <div className="text-left">
-              <p className="text-[13px] font-semibold text-stone-900">Акция</p>
-              <p className="text-[11px] text-stone-400">Получить</p>
-            </div>
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => { showSnack('Openclaw создаёт событие...', 'info'); await fetchEvent(); showSnack('Новое событие создано!', 'success') }}
+              className="flex-1 bg-white rounded-2xl p-3.5 flex items-center gap-2.5 active:bg-stone-50 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
+                <Zap size={16} className="text-violet-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-[13px] font-semibold text-stone-900">Событие</p>
+                <p className="text-[11px] text-stone-400">Получить</p>
+              </div>
+            </button>
+            <button
+              onClick={async () => { showSnack('Openclaw создаёт акцию...', 'info'); await fetchPromo(); showSnack('Новая акция!', 'success') }}
+              className="flex-1 bg-white rounded-2xl p-3.5 flex items-center gap-2.5 active:bg-stone-50 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
+                <Sparkles size={16} className="text-amber-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-[13px] font-semibold text-stone-900">Акция</p>
+                <p className="text-[11px] text-stone-400">Получить</p>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 
