@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ascend System MVP</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">▲</div>
+        <div>
+          <div class="brand-title">Ascend</div>
+          <div class="brand-subtitle">System Interface</div>
+        </div>
+      </div>
+
+      <div class="player-card glass">
+        <div class="small-label">Hunter Profile</div>
+        <h2 id="playerName">Ануар</h2>
+        <div class="rank-row">
+          <span id="rankBadge" class="rank-badge">E-Rank</span>
+          <span id="levelText">Level 3</span>
+        </div>
+        <div class="xp-block">
+          <div class="xp-meta">
+            <span>XP</span>
+            <span id="xpText">120 / 200</span>
+          </div>
+          <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="stats-card glass">
+        <div class="small-label">Stats</div>
+        <div id="statsGrid" class="stats-grid"></div>
+      </div>
+
+      <div class="system-card glass">
+        <div class="small-label">System Notice</div>
+        <p>Выполняй квесты, повышай ранг, не копи штрафной долг.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar glass">
+        <div>
+          <div class="small-label">Daily Control Panel</div>
+          <h1>Quest Dashboard</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="generateQuestBtn" class="secondary-btn">+ Сгенерировать квест</button>
+          <button id="resetBtn" class="danger-btn">Сбросить демо</button>
+        </div>
+      </header>
+
+      <section class="hero-grid">
+        <div class="hero-card glass glow">
+          <div class="small-label">Main Quest</div>
+          <h3 id="mainQuestTitle">Подготовка к Work and Travel Interview</h3>
+          <p id="mainQuestDesc">Собрать 10 сильных ответов для визового интервью и проговорить их вслух 2 раза.</p>
+          <div class="quest-meta-row">
+            <span class="pill gold">+120 XP</span>
+            <span class="pill dark">Boss Setup</span>
+            <span class="pill red">Penalty: -25 XP</span>
+          </div>
+        </div>
+        <div class="summary-card glass">
+          <div class="small-label">Today</div>
+          <div class="summary-metrics">
+            <div><strong id="activeCount">0</strong><span>Активных</span></div>
+            <div><strong id="completedCount">0</strong><span>Выполнено</span></div>
+            <div><strong id="failedCount">0</strong><span>Провалено</span></div>
+            <div><strong id="streakCount">0</strong><span>Стрик</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel glass">
+          <div class="panel-header">
+            <div>
+              <div class="small-label">Active / Completed / Failed</div>
+              <h3>Quests</h3>
+            </div>
+          </div>
+          <div id="questList" class="quest-list"></div>
+        </div>
+
+        <div class="panel glass">
+          <div class="panel-header">
+            <div>
+              <div class="small-label">Live Feed</div>
+              <h3>System Log</h3>
+            </div>
+          </div>
+          <div id="systemLog" class="system-log"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="questTemplate">
+    <div class="quest-card">
+      <div class="quest-card-top">
+        <div>
+          <div class="quest-type"></div>
+          <h4 class="quest-title"></h4>
+        </div>
+        <span class="quest-status"></span>
+      </div>
+      <p class="quest-desc"></p>
+      <div class="quest-rewards"></div>
+      <div class="quest-actions">
+        <button class="complete-btn">Выполнено</button>
+        <button class="fail-btn">Провалено</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
