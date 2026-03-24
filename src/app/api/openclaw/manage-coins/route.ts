@@ -1,12 +1,5 @@
 import { NextResponse } from 'next/server'
 
-/**
- * POST /api/openclaw/manage-coins
- *
- * Openclaw AI manages the player's JUTI coin balance.
- * Can add or subtract coins with a reason.
- */
-
 export async function POST(req: Request) {
   try {
     const { action, amount, reason, currentBalance } = await req.json()

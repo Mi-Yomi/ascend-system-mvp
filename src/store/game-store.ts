@@ -86,6 +86,7 @@ interface GameState {
     jutiReward?: number
     source?: string
   }) => Promise<void>
+  heartbeat: () => Promise<{ message: string; suggestion: string | null; shouldGenerateQuest: boolean } | null>
 }
 
 /* ── Helpers ── */
@@ -474,6 +475,31 @@ export const useGameStore = create<GameState>()(
             quests: [quest, ...state.quests],
             logs: [makeLog('Victor quest injected', `${quest.title} добавлен локально.`, true), ...state.logs],
           }))
+        }
+      },
+
+      heartbeat: async () => {
+        try {
+          const { profile, quests } = get()
+          const res = await fetch('/api/openclaw/heartbeat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile, quests }),
+          })
+          if (!res.ok) return null
+          const data = await res.json()
+
+          set((state) => ({
+            logs: [makeLog('Heartbeat', data.message, data.status !== 'ok'), ...state.logs],
+          }))
+
+          if (data.shouldGenerateQuest) {
+            get().generateQuestFromAPI()
+          }
+
+          return data
+        } catch {
+          return null
         }
       },
 

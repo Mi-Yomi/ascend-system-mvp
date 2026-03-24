@@ -1,59 +1,40 @@
 import { NextResponse } from 'next/server'
-
-/**
- * POST /api/openclaw/assign-rank
- *
- * Openclaw AI evaluates the player's profile and assigns an appropriate rank.
- * Can override the XP-based rank system based on AI analysis of stats balance.
- */
+import { askOpenclaw } from '@/lib/anthropic'
 
 export async function POST(req: Request) {
   try {
     const { profile } = await req.json()
     const { xp, stats } = profile || {}
 
-    // --- Openclaw AI Rank Logic (Mock) ---
-    // Analyze overall stats balance
-    const statValues = Object.values(stats || {}) as number[]
-    const avgStat = statValues.length ? statValues.reduce((a, b) => a + b, 0) / statValues.length : 0
-    const minStat = statValues.length ? Math.min(...statValues) : 0
+    const prompt = `Оцени игрока и определи его ранг.
 
-    // XP-based rank
-    let xpRank = 'E-Rank'
-    if (xp >= 700) xpRank = 'A-Rank'
-    else if (xp >= 500) xpRank = 'B-Rank'
-    else if (xp >= 300) xpRank = 'C-Rank'
-    else if (xp >= 180) xpRank = 'D-Rank'
+XP: ${xp || 0}
+Статы: ${JSON.stringify(stats || {})}
 
-    // AI can adjust rank based on stats balance
-    let newRank = xpRank
-    let reason = `Ранг определён по XP: ${xp}`
-    let changed = false
+Правила рангов по XP:
+- E-Rank: 0-179 XP
+- D-Rank: 180-299 XP
+- C-Rank: 300-499 XP
+- B-Rank: 500-699 XP
+- A-Rank: 700+ XP
 
-    // If stats are very unbalanced, AI might lower rank
-    if (minStat < 3 && avgStat > 8) {
-      const ranks = ['E-Rank', 'D-Rank', 'C-Rank', 'B-Rank', 'A-Rank']
-      const idx = ranks.indexOf(xpRank)
-      if (idx > 0) {
-        newRank = ranks[idx - 1]
-        reason = `Openclaw понизил ранг: слабый параметр (${minStat}). Развивай все характеристики равномерно.`
-        changed = true
-      }
-    }
+Но ты можешь переопределить ранг:
+- Понизить если статы сильно несбалансированы (один стат < 3 при среднем > 8)
+- Повысить если все статы высокие и сбалансированные (min >= 10, avg >= 12)
 
-    // If all stats are high, AI might boost rank
-    if (minStat >= 10 && avgStat >= 12) {
-      const ranks = ['E-Rank', 'D-Rank', 'C-Rank', 'B-Rank', 'A-Rank']
-      const idx = ranks.indexOf(xpRank)
-      if (idx < 4) {
-        newRank = ranks[idx + 1]
-        reason = `Openclaw повысил ранг! Сбалансированное развитие всех характеристик.`
-        changed = true
-      }
-    }
+Верни JSON:
+{
+  "newRank": "X-Rank",
+  "reason": "Объяснение на русском",
+  "changed": true/false (true если ранг отличается от XP-ранга)
+}`
 
-    return NextResponse.json({ newRank, reason, changed })
-  } catch {
+    const text = await askOpenclaw(prompt)
+    const result = JSON.parse(text)
+
+    return NextResponse.json(result)
+  } catch (e) {
+    console.error('assign-rank error:', e)
     return NextResponse.json({ error: 'Rank assignment failed' }, { status: 500 })
   }
 }

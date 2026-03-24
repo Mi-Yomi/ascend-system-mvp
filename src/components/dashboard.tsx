@@ -50,6 +50,17 @@ export function Dashboard() {
     }
   }, [events.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Openclaw heartbeat — runs every 5 minutes
+  const heartbeat = useGameStore((s) => s.heartbeat)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      heartbeat()
+    }, 5 * 60 * 1000)
+    // Run once on mount after short delay
+    const initialTimer = setTimeout(() => heartbeat(), 10_000)
+    return () => { clearInterval(interval); clearTimeout(initialTimer) }
+  }, [heartbeat])
+
   const handleEventAccept = (event: GameEvent) => {
     showSnack(`Вы участвуете в "${event.title}"!`, 'success')
     setEventModal(null)

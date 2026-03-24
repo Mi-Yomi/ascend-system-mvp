@@ -5,7 +5,7 @@ const endpoints = [
     method: 'POST',
     path: '/api/openclaw/generate-quest',
     title: 'Генерация квеста',
-    description: 'Openclaw AI анализирует профиль игрока и генерирует персонализированный квест, ориентируясь на слабые характеристики.',
+    description: 'Openclaw AI анализирует профиль игрока и генерирует персонализированный квест через Claude AI, ориентируясь на слабые характеристики.',
     body: `{
   "profile": {
     "xp": 120,
@@ -68,12 +68,7 @@ const endpoints = [
   "verified": true,
   "confidence": 0.92,
   "feedback": "Отлично! Openclaw подтверждает выполнение.",
-  "bonusJuti": 5,
-  "_aiMeta": {
-    "questAnalyzed": "Утренняя рутина без телефона",
-    "photoPresent": true,
-    "noteLength": 42
-  }
+  "bonusJuti": 5
 }`,
     notes: 'confidence: 0-1. bonusJuti зависит от детальности описания. Фото обязательно для верификации.',
   },
@@ -81,7 +76,7 @@ const endpoints = [
     method: 'POST',
     path: '/api/openclaw/manage-coins',
     title: 'Управление JUTI монетами',
-    description: 'AI управляет балансом JUTI монет: начисление бонусов и списание штрафов с проверкой баланса.',
+    description: 'Управление балансом JUTI монет: начисление бонусов и списание штрафов с проверкой баланса.',
     body: `{
   "action": "add",
   "amount": 50,
@@ -121,7 +116,7 @@ const endpoints = [
   "reason": "Openclaw понизил ранг: слабый параметр (2)...",
   "changed": true
 }`,
-    notes: 'Ранги: E-Rank → D-Rank → C-Rank → B-Rank → A-Rank. AI понижает при min < 3 и avg > 8. Повышает при min >= 10 и avg >= 12.',
+    notes: 'Ранги: E-Rank → D-Rank → C-Rank → B-Rank → A-Rank. AI понижает при несбалансированных статах, повышает при сбалансированных.',
   },
   {
     method: 'POST',
@@ -134,12 +129,9 @@ const endpoints = [
     "id": "event_1711234567890",
     "title": "Неделя Дисциплины",
     "description": "Выполняй все квесты 7 дней подряд...",
-    "image": "/events/discipline-week.jpg",
-    "rewards": ["+50 JUTI", "+3 Discipline", "Exclusive Badge"],
+    "rewards": ["+50 JUTI", "+3 Discipline"],
     "duration": "7 дней",
     "color": "#FF6B35",
-    "startsAt": "2024-03-24T12:00:00.000Z",
-    "expiresAt": "2024-03-31T12:00:00.000Z",
     "active": true
   }
 }`,
@@ -158,10 +150,7 @@ const endpoints = [
     "code": "DOUBLE24",
     "type": "multiplier",
     "value": 2,
-    "minLevel": 1,
-    "active": true,
-    "createdAt": "2024-03-24T12:00:00.000Z",
-    "expiresAt": "2024-03-25T12:00:00.000Z"
+    "active": true
   }
 }`,
     notes: 'type: "multiplier" | "bonus" | "cashback" | "shield". minLevel — минимальный уровень для активации.',
@@ -196,6 +185,24 @@ const endpoints = [
 }`,
   },
   {
+    method: 'POST',
+    path: '/api/openclaw/heartbeat',
+    title: 'Heartbeat проверка',
+    description: 'Openclaw периодически проверяет состояние игрока и активных квестов. Даёт рекомендации, напоминания и мотивационные сообщения.',
+    body: `{
+  "profile": { "level": 3, "xp": 120, "rank": "E-Rank", "streak": 4, "juti": 50, "stats": {...} },
+  "quests": [{ "id": "...", "title": "...", "status": "active", ... }]
+}`,
+    response: `{
+  "status": "ok",
+  "message": "Отличный стрик! Продолжай в том же духе.",
+  "suggestion": "Попробуй закрыть Boss Quest для максимального XP.",
+  "questsNeedAttention": [],
+  "shouldGenerateQuest": false
+}`,
+    notes: 'status: "ok" | "warning" | "critical". Запускается автоматически каждые 5 минут.',
+  },
+  {
     method: 'GET',
     path: '/api/openclaw/status',
     title: 'Статус системы',
@@ -203,8 +210,10 @@ const endpoints = [
     body: null,
     response: `{
   "status": "online",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "name": "Openclaw",
+  "engine": "claude-sonnet-4-20250514",
+  "mode": "production",
   "capabilities": [
     "quest-generation",
     "penalty-generation",
@@ -213,11 +222,9 @@ const endpoints = [
     "rank-assignment",
     "event-creation",
     "promo-creation",
-    "manual-quest-injection"
-  ],
-  "model": "openclaw-v1-mock",
-  "uptime": 12345.678,
-  "timestamp": "2024-03-24T12:00:00.000Z"
+    "manual-quest-injection",
+    "heartbeat"
+  ]
 }`,
   },
 ]
@@ -242,19 +249,19 @@ export default function DocsPage() {
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="bg-stone-50 rounded-xl p-3">
               <div className="text-stone-400 text-xs mb-1">Версия</div>
-              <div className="font-semibold text-stone-900">1.0.0</div>
+              <div className="font-semibold text-stone-900">2.0.0</div>
             </div>
             <div className="bg-stone-50 rounded-xl p-3">
               <div className="text-stone-400 text-xs mb-1">Эндпоинтов</div>
               <div className="font-semibold text-stone-900">{endpoints.length}</div>
             </div>
             <div className="bg-stone-50 rounded-xl p-3">
-              <div className="text-stone-400 text-xs mb-1">Формат</div>
-              <div className="font-semibold text-stone-900">JSON</div>
+              <div className="text-stone-400 text-xs mb-1">AI Engine</div>
+              <div className="font-semibold text-stone-900">Claude Sonnet</div>
             </div>
             <div className="bg-stone-50 rounded-xl p-3">
               <div className="text-stone-400 text-xs mb-1">Режим</div>
-              <div className="font-semibold text-stone-900">Mock AI</div>
+              <div className="font-semibold text-stone-900">Production</div>
             </div>
           </div>
         </div>
@@ -360,6 +367,9 @@ const { quest } = await openclaw.generateQuest(profile)
 const result = await openclaw.verifyCompletion(
   quest.title, quest.description, photoBase64, note
 )
+
+// Heartbeat проверка
+const hb = await openclaw.heartbeat(profile, quests)
 
 // Управление монетами
 const coins = await openclaw.manageCoins('add', 50, 'bonus', 150)

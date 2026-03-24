@@ -1,9 +1,8 @@
 /**
  * Openclaw AI Client
  *
- * Calls the local API routes which wrap the Openclaw AI engine.
- * To connect a real Openclaw backend, update the API route handlers
- * in src/app/api/openclaw/
+ * Calls the local API routes powered by Claude AI (Anthropic).
+ * All endpoints use real AI — no mocks.
  */
 
 export interface OpenclawQuest {
@@ -56,11 +55,20 @@ export interface Promo {
   claimed: boolean
 }
 
+export interface HeartbeatResult {
+  status: 'ok' | 'warning' | 'critical'
+  message: string
+  suggestion: string | null
+  questsNeedAttention: string[]
+  shouldGenerateQuest: boolean
+}
+
 export interface OpenclawStatus {
-  status: 'online' | 'offline'
+  status: 'online' | 'no_api_key'
   version: string
-  model: string
-  features: string[]
+  engine: string
+  mode: string
+  capabilities: string[]
 }
 
 async function post<T>(endpoint: string, body: Record<string, unknown>): Promise<T> {
@@ -107,6 +115,10 @@ export const openclaw = {
   /** AI creates a promotional offer */
   createPromo: () =>
     post<{ promo: Promo }>('create-promo', {}),
+
+  /** Heartbeat — AI checks quest status and gives feedback */
+  heartbeat: (profile: Record<string, unknown>, quests: Record<string, unknown>[]) =>
+    post<HeartbeatResult>('heartbeat', { profile, quests }),
 
   /** Get Openclaw system status */
   getStatus: () =>

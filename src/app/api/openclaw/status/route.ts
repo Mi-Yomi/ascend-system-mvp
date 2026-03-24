@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server'
 
-/**
- * GET /api/openclaw/status
- *
- * Returns the current status of the Openclaw AI system.
- * Used for health checks and displaying AI status in the UI.
- */
-
 export async function GET() {
+  const hasKey = !!process.env.ANTHROPIC_API_KEY
+
   return NextResponse.json({
-    status: 'online',
-    version: '1.0.0',
+    status: hasKey ? 'online' : 'no_api_key',
+    version: '2.0.0',
     name: 'Openclaw',
+    engine: 'claude-sonnet-4-20250514',
+    mode: 'production',
     capabilities: [
       'quest-generation',
       'penalty-generation',
@@ -21,8 +18,8 @@ export async function GET() {
       'event-creation',
       'promo-creation',
       'manual-quest-injection',
+      'heartbeat',
     ],
-    model: 'openclaw-v1-mock',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   })
