@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    height: 100%;
+    overflow: auto;
+    overscroll-behavior-y: contain;
+    background-color: #F2F2F7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Prevent pull-to-refresh */
+  body {
+    overflow-y: scroll;
+  }
+
+  /* Custom scrollbar — hidden on mobile */
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  /* Desktop: show subtle scrollbar */
+  @media (min-width: 768px) {
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D4D4D8;
+      border-radius: 999px;
+    }
+  }
+
+  /* Allow text selection in descriptions */
+  p, .selectable {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
+
+/* Hide scrollbar for horizontal scroll containers */
+.stats-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.stats-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Safe area vars fallback */
+@supports not (padding: env(safe-area-inset-bottom)) {
+  :root {
+    --sai-bottom: 0px;
+  }
+}
